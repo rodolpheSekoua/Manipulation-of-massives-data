@@ -15,16 +15,12 @@ SPARK_MD5=3b8dd273912a0aa8df79b49b5fdf2624
 echo "This is an automated script for installing spark"
 
 # create a path to config spark
-if [[ ! -d $HOME/scripts]]; then 
-    mkdir $HOME/scripts
-    echo "export PATH=\$PATH:$HOME/scripts" >> $SHELL_PROFILE
-else
-    echo "scripts folder already exists! Verify this folder has been added to your PATH"
-fi
+# This directory will be created if it does not exist otherwise nothing to do
+mkdir -p $HOME/scripts
 
 if [[ -d $HOME/scripts ]]; then
     read -r -p "Would you like to create the jupyspark.sh script for launching a local jupyter spark server? [y/N] " response
-    if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    if [[ $response -eq "y" ]]; then
         echo "#!/bin/bash
         export PYSPARK_DRIVER_PYTHON=jupyter
         export PYSPARK_DRIVER_PYTHON_OPTS=\"notebook --NotebookApp.open_browser=True --NotebookApp.ip='localhost' --NotebookApp.port=8888\"
@@ -35,13 +31,15 @@ if [[ -d $HOME/scripts ]]; then
         --conf spark.sql.warehouse.dir=\"file:///tmp/spark-warehouse\" \
         --packages com.databricks:spark-csv_2.11:1.5.0 \
         --packages com.amazonaws:aws-java-sdk-pom:1.10.34 \
-        --packages org.apache.hadoop:hadoop-aws:2.7.3" > $HOME/scripts/jupyspark.sh
+        --packages org.apache.hadoop:hadoop-aws:2.7.3" >> $HOME/scripts/jupyspark.sh
         # transform the file in executable file
         chmod +x $HOME/scripts/jupyspark.sh
+    else
+        echo "\nNothing to do..."    
     fi
 
     read -r -p "Would you like to create the localsparksubmit.sh script for submittiing local python scripts through spark-submit? [y/N] " response
-    if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    if [[ $response -eq "y" ]]; then
         echo "#!/bin/bash
         \${SPARK_HOME}/bin/spark-submit \
         --master local[4] \
