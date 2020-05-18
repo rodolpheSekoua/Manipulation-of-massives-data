@@ -9,7 +9,7 @@ SPARK_INSTALL_LOCATION=$HOME
 SPARK_URL=https://downloads.apache.org/spark/spark-2.4.5/spark-2.4.5-bin-hadoop2.7.tgz
 
 
-SPARK_FOLDER_NAME=spark-2.4.5-bin-hadoop2.7.tgz
+SPARK_FOLDER_NAME=spark-2.4.5-bin-hadoop2.7
 
 SPARK_MD5=3b8dd273912a0aa8df79b49b5fdf2624
 echo "This is an automated script for installing spark"
@@ -18,9 +18,8 @@ echo "This is an automated script for installing spark"
 # This directory will be created if it does not exist otherwise nothing to do
 mkdir -p $HOME/scripts
 
-if [[ -d $HOME/scripts ]]; then
-    read -r -p "Would you like to create the jupyspark.sh script for launching a local jupyter spark server? [y/N] " response
-    if [[ $response -eq "y" ]]; then
+read -r -p "Would you like to create the jupyspark.sh script for launching a local jupyter spark server? [y/N] " response
+if [[ "$response" -eq "y" ]]; then
         echo "#!/bin/bash
         export PYSPARK_DRIVER_PYTHON=jupyter
         export PYSPARK_DRIVER_PYTHON_OPTS=\"notebook --NotebookApp.open_browser=True --NotebookApp.ip='localhost' --NotebookApp.port=8888\"
@@ -34,12 +33,12 @@ if [[ -d $HOME/scripts ]]; then
         --packages org.apache.hadoop:hadoop-aws:2.7.3" >> $HOME/scripts/jupyspark.sh
         # transform the file in executable file
         chmod +x $HOME/scripts/jupyspark.sh
-    else
+   else
         echo "\nNothing to do..."    
-    fi
+fi
 
-    read -r -p "Would you like to create the localsparksubmit.sh script for submittiing local python scripts through spark-submit? [y/N] " response
-    if [[ $response -eq "y" ]]; then
+read -r -p "Would you like to create the localsparksubmit.sh script for submittiing local python scripts through spark-submit? [y/N] " response
+if [[ "$response" -eq "y" ]]; then
         echo "#!/bin/bash
         \${SPARK_HOME}/bin/spark-submit \
         --master local[4] \
@@ -52,21 +51,12 @@ if [[ -d $HOME/scripts ]]; then
         \$1" > $HOME/scripts/localsparksubmit.sh
 
         chmod +x $HOME/scripts/localsparksubmit.sh
-    fi
+fi
 fi
 
 #check to see if JDK is installed
-javac -version 2> /dev/null
-if [! $? -eq 0]; then
-    #install JDK
-    if [[ $(uname -s) = 'Linux']]
-        echo "Downloading JDK..."
-        sudo add-apt-repository ppa:webupd8team/java
-        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
-        sudo apt-get update
-        sudo apt-get install oracle-java8-installer
-    fi
-fi
+bash 1_install_conda.sh
+bash java_script.sh
 
 SUCCESSFUL_SPARK_INSTALL=0
 SPARK_INSTALL_TRY=0
