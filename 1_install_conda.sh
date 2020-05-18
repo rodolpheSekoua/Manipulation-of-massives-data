@@ -27,7 +27,3 @@ conda install hdfs3 findspark ujson jsonschema toolz boto3 py4j numpy pandas==0.
 rm ~/miniconda.sh
 	
 echo bootstrap_conda.sh completed. PATH now: $PATH
-	
-export PYSPARK_PYTHON="/home/hadoop/conda/bin/python3.5"
-
-echo 'export PYSPARK_PYTHON=/home/hadoop/conda/bin/python3.5' >> $HOME/.bashrc 
