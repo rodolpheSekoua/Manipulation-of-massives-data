@@ -11,6 +11,7 @@ SPARK_URL=https://downloads.apache.org/spark/spark-2.4.5/spark-2.4.5-bin-hadoop2
 
 SPARK_FOLDER_NAME=spark-2.4.5-bin-hadoop2.7.tgz
 
+SPARK_MD5=3b8dd273912a0aa8df79b49b5fdf2624
 echo "This is an automated script for installing spark"
 
 # create a path to config spark
@@ -78,10 +79,26 @@ if [[ $(uname -s)= "Linux"]]; then
     while [$SUCCESSFUL_SPARK_INSTALL -eq 0]
     do
         curl $SPARK_URL > $SPARK_INSTALL_LOCATION/$SPARK_FOLDER_NAME
-        tar -xzf $SPARK_INSTALL_LOCATION/$SPARK_FOLDER_NAME -C $SPARK_INSTALL_LOCATION
-        rm $SPARK_INSTALL_LOCATION/$SPARK_FOLDER_NAME
-        pip install py4j
-        SUCCESSFUL_SPARK_INSTALL=1
+        #check MD5 hash
+        if [[$(openssl md5 $SPARK_INSTALL_LOCATION/$SPARK_FOLDER_NAME |sed -e "s/^.*//") == "$SPARK_MD5" ]]
+        then 
+            tar -xzf $SPARK_INSTALL_LOCATION/$SPARK_FOLDER_NAME -C $SPARK_INSTALL_LOCATION
+            rm $SPARK_INSTALL_LOCATION/$SPARK_FOLDER_NAME
+            pip install py4j
+            SUCCESSFUL_SPARK_INSTALL=1
+        else
+            echo "ERROR: Spark MD5 hash does not match"
+            echo "$(openssl md5 $SPARK_INSTALL_LOCATION/$SPARK_FOLDER_NAME | sed -e "s/^.*//") != $SPARK_MD5"
+            if [$ SPARK_INSTALL_TRY -lt 3]
+            then
+                echo -e "\nTrying Spark install again\n"
+                SPARK_INSTALL_TRY=$[$SPARK_INSTALL_TRY+1]
+                echo $SPARK_INSTALL_TRY
+                SPARK_MD5=7776f28d5e0a2ad04b5046c1786ee9cd
+            else
+                echo -e "\nSPARK INSTALL FAILED\n"
+                echo -e "Check the MD5 hash and run again"
+                exit 1
     done
 else
     echo "Unable to detect Operating System"
